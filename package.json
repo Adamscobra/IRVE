@@ -1,0 +1,21 @@
+{
+  "name": "irve-app",
+  "version": "1.0.0",
+  "description": "Interface pour application de câblage IRVE",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "irve",
+    "cablage",
+    "nf-c-14-100"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^3.1.9",
+    "express": "^4.18.2"
+  }
+}

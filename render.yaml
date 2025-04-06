@@ -1,0 +1,16 @@
+build:
+  image: node:18
+  install: npm install
+  build: npm run build
+
+services:
+  - type: web
+    name: irve-app
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000

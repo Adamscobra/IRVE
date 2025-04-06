@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><%= title %></h1>
+        </header>
+
+        <main>
+            <div class="card">
+                <section class="recap-section">
+                    <h3>Paramètres Utilisés</h3>
+                    <p><strong>Puissance :</strong> <%= inputParams.puissance %> kW</p>
+                    <p><strong>Tension :</strong> <%= inputParams.tension === 'triphase' ? '400V Triphasé' : '230V Monophasé' %></p>
+                    <p><strong>Longueur :</strong> <%= inputParams.longueur %> m</p>
+                    <p><strong>Mode de pose :</strong> <%= inputParams.mode_pose %></p>
+                </section>
+
+                <hr>
+
+                <section class="results-section">
+                    <h2>Calculs & Recommandations</h2>
+
+                    <div class="result-item">
+                        <span class="label">Courant d'emploi calculé (Ib) :</span>
+                        <span class="value"><%= results.courantEmploi %> A</span>
+                    </div>
+                     <div class="result-item">
+                        <span class="label">Dispositif de protection :</span>
+                        <span class="value"><%= results.protectionRecommandee %></span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Section de câble minimale :</span>
+                        <span class="value highlight"><%= results.sectionCableMin %></span>
+                    </div>
+                     <div class="result-item">
+                        <span class="label">Courant admissible simulé (Iz) :</span>
+                        <span class="value"><%= results.courantAdmissible %> A</span>
+                    </div>
+                     <div class="result-item">
+                        <span class="label">Chute de tension calculée :</span>
+                        <span class="value"><%= results.chuteTensionPourcent %> %</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">Diamètre minimal conduit (Exemple) :</span>
+                        <span class="value"><%= results.diametreConduit %></span>
+                    </div>
+                     <div class="result-item">
+                        <span class="label">Taux remplissage max. autorisé :</span>
+                        <span class="value"><%= results.tauxRemplissage %></span>
+                    </div>
+                </section>
+
+                <hr>
+
+                <section class="conformity-section">
+                    <h2>Conformité Normative (Simulation)</h2>
+
+                    <% if (results.conformite.status === 'CONFORME') { %>
+                        <div class="conformity-banner success">
+                            <span class="status-icon">✅</span> Installation CONFORME
+                        </div>
+                    <% } else { %>
+                         <div class="conformity-banner error">
+                            <span class="status-icon">❌</span> Installation NON CONFORME
+                        </div>
+                    <% } %>
+
+                    <ul class="conformity-details">
+                        <% results.conformite.details.forEach(item => { %>
+                            <li>
+                                <span class="status-icon"><%= item.ok ? '✅' : '❌' %></span>
+                                <%= item.check %>
+                                <% if (!item.ok && item.raison) { %>
+                                    <span class="reason">(Raison: <%= item.raison %>)</span>
+                                <% } else if (item.ok && item.raison && item.raison.includes('%')) { %>
+                                     <span class="reason">(<%= item.raison %>)</span>
+                                <% } else if (item.raison && item.raison.startsWith('(')) { %>
+                                     <span class="reason"><%= item.raison %></span>
+                                <% } %>
+                            </li>
+                        <% }); %>
+                    </ul>
+                     <p class="disclaimer">Ces résultats sont basés sur une simulation et ne remplacent pas une étude complète par un professionnel qualifié respectant l'intégralité de la norme NF C 14-100 et NF C 15-100.</p>
+                </section>
+
+                <div class="actions">
+                    <a href="/" class="btn btn-secondary">Modifier les Paramètres</a>
+                    <a href="/" class="btn btn-tertiary">Nouveau Calcul</a>
+                </div>
+            </div>
+        </main>
+         <footer>
+            <p>© 2023 Votre Entreprise - Outil indicatif</p>
+        </footer>
+    </div>
+            <%= results.conformite.status %>
+        </p>
+        <ul>
+            <% results.conformite.details.forEach(detail => { %>
+                <li class="<%= detail.ok ? 'ok' : 'nok' %>">
+                    <%= detail.check %>: <%= detail.ok ? '✓' : '✗' %>
+                    <% if (!detail.ok && detail.raison) { %>
+                        (<%= detail.raison %>)
+                    <% } %>
+                </li>
+            <% }); %>
+        </ul>
+    </div>
+    
+    <a href="/">Nouveau calcul</a>
+</body>
+</html>
