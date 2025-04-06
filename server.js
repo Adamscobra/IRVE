@@ -1,7 +1,9 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-const port = process.env.PORT || 3000;
+
+// Get port from command line arguments or use default
+const port = process.argv[2] || process.env.PORT || 3000;
 
 // Configuration du moteur de template EJS
 app.set('view engine', 'ejs');
@@ -49,26 +51,44 @@ function simulateCalculation(params) {
   const puissance = parseFloat(params.puissance) || 7.4;
   const tension = params.tension === 'triphase' ? 400 : 230;
   const longueur = parseFloat(params.longueur) || 15;
+  
+  // Nouveaux paramètres
+  const nombreEmplacements = parseInt(params.nombreEmplacements) || 1;
+  const typeImmeuble = params.typeImmeuble || 'residentiel';
+  const materiauConducteur = params.materiauConducteur || 'cuivre';
+  const facteurPuissance = parseFloat(params.facteurPuissance) || 0.9;
+  const typeProtection = params.typeProtection || 'A';
 
   let courantEmploi, sectionMin, protection, chuteTension, typeDiff;
 
   // Logique très basique (non conforme à la norme, juste pour l'exemple !)
   if (tension === 400) { // Triphasé
-      courantEmploi = (puissance * 1000) / (tension * Math.sqrt(3));
-      if (puissance <= 11) { sectionMin = '5G2.5'; protection = '20A'; typeDiff = 'A'; }
-      else { sectionMin = '5G6'; protection = '32A'; typeDiff = 'A'; } // Ou B si DC > 6mA possible
+      courantEmploi = (puissance * 1000) / (tension * Math.sqrt(3) * facteurPuissance);
+      if (puissance <= 11) { sectionMin = '5G2.5'; protection = '20A'; typeDiff = typeProtection; }
+      else { sectionMin = '5G6'; protection = '32A'; typeDiff = typeProtection; } // Ou B si DC > 6mA possible
   } else { // Monophasé
-      courantEmploi = (puissance * 1000) / tension;
-      if (puissance <= 3.7) { sectionMin = '3G2.5'; protection = '20A'; typeDiff = 'A'; }
-      else { sectionMin = '3G6'; protection = '40A'; typeDiff = 'A'; } // Ou F/B selon borne
+      courantEmploi = (puissance * 1000) / (tension * facteurPuissance);
+      if (puissance <= 3.7) { sectionMin = '3G2.5'; protection = '20A'; typeDiff = typeProtection; }
+      else { sectionMin = '3G6'; protection = '40A'; typeDiff = typeProtection; } // Ou F/B selon borne
   }
 
-  // Simulation chute tension (très grossière)
-  // Ro cuivre = 0.01786 ohm.mm²/m. Formule simplifiée U = 2 * Ro * L * Ib / S (mono)
+  // Simulation chute tension avec prise en compte du matériau
+  // Ro cuivre = 0.01786 ohm.mm²/m, Ro aluminium = 0.02941 ohm.mm²/m
+  const resistivite = materiauConducteur === 'cuivre' ? 0.01786 : 0.02941;
   const sectionNum = parseFloat(sectionMin.split('G')[1].replace(',', '.'));
-  chuteTension = (2 * 0.01786 * longueur * courantEmploi) / sectionNum; // En Volts
+  chuteTension = (2 * resistivite * longueur * courantEmploi) / sectionNum; // En Volts
   let chuteTensionPourcent = (chuteTension / tension) * 100;
   if (tension === 400) chuteTensionPourcent /= Math.sqrt(3); // Approximation triphasé
+  
+  // Calcul PIRVE (Puissance Infrastructure Recharge Véhicule Électrique)
+  let puissancePIRVE = 0;
+  if (typeImmeuble === 'residentiel') {
+    // Pour les immeubles résidentiels: 20% des places avec min 1 place
+    puissancePIRVE = Math.max(1, Math.ceil(nombreEmplacements * 0.2)) * puissance;
+  } else {
+    // Pour les immeubles non résidentiels: 10% des places avec min 2 places
+    puissancePIRVE = Math.max(2, Math.ceil(nombreEmplacements * 0.1)) * puissance;
+  }
 
    // Simulation conformité (basique)
    const conformeChuteTension = chuteTensionPourcent <= 5;
@@ -87,6 +107,7 @@ function simulateCalculation(params) {
     chuteTensionPourcent: chuteTensionPourcent.toFixed(2),
     diametreConduit: sectionNum > 6 ? 'Ø 32 mm' : 'Ø 25 mm', // Très simplifié
     tauxRemplissage: '40%', // Exemple fixe
+    puissancePIRVE: puissancePIRVE.toFixed(1), // Puissance PIRVE calculée
     conformite: {
         status: estConformeGlobal ? 'CONFORME' : 'NON CONFORME',
         details: [
