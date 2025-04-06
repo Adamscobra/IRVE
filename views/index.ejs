@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><%= title %></h1>
+            <p class="subtitle">Respectant la norme NF C 14-100</p>
+        </header>
+
+        <main>
+            <div class="card">
+                <form action="/calculate" method="POST">
+                    <h2>Paramètres de l'Installation</h2>
+
+                    <fieldset class="form-section">
+                        <legend>Informations Borne</legend>
+                        <div class="form-group">
+                            <label for="puissance">Puissance de la borne (kW)</label>
+                            <select id="puissance" name="puissance" required>
+                                <option value="3.7">3.7 kW</option>
+                                <option value="7.4" selected>7.4 kW</option>
+                                <option value="11">11 kW</option>
+                                <option value="22">22 kW</option>
+                                <!-- Ajoutez d'autres options si nécessaire -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="type_prise">Type de prise</label>
+                            <select id="type_prise" name="type_prise" required>
+                                <option value="T2" selected>Type 2</option>
+                                <option value="T2S">Type 2S</option>
+                                <option value="T3">Type 3</option>
+                                <option value="EF">Prise Domestique E/F</option>
+                                <!-- CHAdeMO/CCS sont DC, calcul différent, à voir si inclus -->
+                            </select>
+                        </div>
+                         <div class="form-group">
+                            <label>Tension d'alimentation</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="tension" value="monophase" checked> 230V Monophasé</label>
+                                <label><input type="radio" name="tension" value="triphase"> 400V Triphasé</label>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="form-section">
+                        <legend>Caractéristiques du Circuit</legend>
+                        <div class="form-group">
+                            <label for="longueur">Longueur du câble (mètres)</label>
+                            <input type="number" id="longueur" name="longueur" min="1" step="0.5" value="15" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="mode_pose">Mode de pose</label>
+                            <select id="mode_pose" name="mode_pose" required>
+                                <option value="encastre_isole">Encastré dans mur isolé</option>
+                                <option value="goulotte_mur" selected>En goulotte/plinthe sur mur</option>
+                                <option value="conduit_enterre">Enterré sous conduit ICTA (>60cm)</option>
+                                <option value="apparent_libre">Sur chemin de câble perforé/échelle</option>
+                                <!-- Références plus précises de la NF C 15-100 utiles ici -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="type_cable">Type de câble envisagé</label>
+                             <select id="type_cable" name="type_cable" required>
+                                <option value="R2V" selected>U-1000 R2V</option>
+                                <option value="H07RNF">H07RN-F</option>
+                                <!-- Autres types pertinents -->
+                            </select>
+                        </div>
+                    </fieldset>
+
+                     <fieldset class="form-section">
+                        <legend>Environnement (Optionnel)</legend>
+                         <div class="form-group">
+                            <label for="temperature">Température ambiante (°C)</label>
+                            <input type="number" id="temperature" name="temperature" value="30" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="groupement">Groupement de circuits (Facteur K)</label>
+                            <select id="groupement" name="groupement">
+                                <option value="1" selected>Circuit unique (K=1)</option>
+                                <option value="0.8">2 circuits jointifs (K=0.8)</option>
+                                <option value="0.7">3 circuits jointifs (K=0.7)</option>
+                                <!-- Autres facteurs -->
+                            </select>
+                        </div>
+                    </fieldset>
+
+                    <button type="submit" class="btn btn-primary">Calculer le Dimensionnement</button>
+                </form>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2023 Votre Entreprise - Outil indicatif</p>
+        </footer>
+    </div>
+</body>
+</html>
