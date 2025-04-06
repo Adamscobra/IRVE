@@ -256,7 +256,7 @@ hr {
      color: #666; /* Gris si OK mais raison informative */
 }
 /* Cas spécifique pour la chute de tension OK */
-.conformity-details li: V:contains('Chute de tension') .reason {
+.conformity-details li[data-tension="true"] .reason {
     color: #666; /* Gris normal pour l'affichage du % si OK */
 }
 
